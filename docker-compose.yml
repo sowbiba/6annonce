@@ -1,0 +1,48 @@
+version: '2.2'
+
+volumes:
+  db-data:
+  es-data:
+  kibana-config:
+
+services:
+  mysql:
+    image: mysql:5
+    ports:
+      - "32770:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: root
+    restart: always
+    networks:
+      - 6annonce
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.13
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - 6annonce
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.8.13
+    volumes:
+      - kibana-config:/usr/share/kibana/config/
+    ports:
+      - 5601:5601
+    networks:
+      - 6annonce
+
+networks:
+  6annonce:
+    driver: bridge
