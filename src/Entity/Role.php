@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -10,10 +9,13 @@ use Doctrine\ORM\Mapping as ORM;
  * Role
  *
  * @ORM\Table(name="role")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\RoleRepository")
  */
 class Role
 {
+    public const ROLE_DEFAULT = 'ROLE_CLIENT';
+    public const ROLE_MEMBER = 'ROLE_MEMBER';
+    public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
     /**
      * @var int
      *
@@ -41,7 +43,6 @@ class Role
     {
         $this->users = new ArrayCollection();
     }
-
 
     /**
      * Get id

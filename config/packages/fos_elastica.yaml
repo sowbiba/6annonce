@@ -16,10 +16,10 @@ fos_elastica:
                         lastLogin: { type: date, format: basic_date_time }
                         confirmationToken: { type: text }
                         roles:
-                            type: nested
-                            properties:
-                                id: { type: integer }
-                                name: { type: text }
+                            type: text
+#                            properties:
+#                                id: { type: integer }
+#                                name: { type: text }
                     persistence:
                         # the driver can be orm, mongodb or phpcr
                         driver: orm

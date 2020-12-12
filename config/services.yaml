@@ -20,6 +20,7 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
             - '../src/Tests/'
+            - '../src/Search/'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -29,3 +30,20 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    app.security.user_provider.username:
+        class: App\Security\Provider\UserProvider
+
+    app.search.connector.user.mysql:
+        class: App\Search\Connector\MySQLConnector
+        arguments:
+            - '@App\Repository\UserRepository'
+
+    app.search.connector.user.elasticsearch:
+        class: App\Search\Connector\ESConnector
+        arguments:
+            - '@fos_elastica.finder.app.users'
+
+    App\Search\Finder\UserFinder:
+        arguments:
+            - '@app.search.connector.user.elasticsearch'

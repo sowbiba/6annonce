@@ -4,20 +4,18 @@ namespace App\Entity;
 
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ORM\Table(name="user")
+ * @UniqueEntity(fields={"username"}, message="There is already an account with this username")
+ * @UniqueEntity(fields={"email"}, message="There is already an account with this email")
  */
 class User implements UserInterface
 {
-    public const ROLE_DEFAULT = 'ROLE_USER';
-    public const ROLE_MEMBER = 'ROLE_MEMBER';
-    public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
-
     /**
      * @var int
      * @ORM\Id
@@ -47,7 +45,7 @@ class User implements UserInterface
     /**
      * The salt to use for hashing.
      *
-     * @var string
+     * @var string|null
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $salt;
@@ -59,6 +57,11 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     protected $password;
+
+    /**
+     * @var string
+     */
+    protected $plainPassword;
 
     /**
      * @var DateTime|null
@@ -80,6 +83,11 @@ class User implements UserInterface
      * @ORM\JoinTable(name="user_role")
      */
     protected $roles;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isVerified = false;
 
     /**
      * User constructor.
@@ -131,8 +139,6 @@ class User implements UserInterface
     {
         $data = unserialize($serialized);
 
-        var_dump($data);
-
         list(
             $this->password,
             $this->salt,
@@ -165,9 +171,9 @@ class User implements UserInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getSalt(): string
+    public function getSalt(): ?string
     {
         return $this->salt;
     }
@@ -207,11 +213,11 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection
+     * @return string[]
      */
-    public function getRoles(): Collection
+    public function getRoles(): array
     {
-        return $this->roles;
+        return array_map(function (Role $role) { return (string) $role; }, $this->roles->toArray());
     }
 
     /**
@@ -287,11 +293,11 @@ class User implements UserInterface
     }
 
     /**
-     * @param string $salt
+     * @param string|null $salt
      *
      * @return User
      */
-    public function setSalt(string $salt): self
+    public function setSalt(?string $salt): self
     {
         $this->salt = $salt;
 
@@ -394,5 +400,37 @@ class User implements UserInterface
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlainPassword(): string
+    {
+        return $this->plainPassword;
+    }
+
+    /**
+     * @param string $plainPassword
+     *
+     * @return User
+     */
+    public function setPlainPassword(string $plainPassword): User
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
     }
 }
